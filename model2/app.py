@@ -4,10 +4,28 @@ from PIL import Image, ImageTk
 import cv2
 from ultralytics import YOLO
 import threading
+import random
+
 
 # Load mô hình YOLOv8 đã huấn luyện
-model = YOLO('D:\\taco_format_yolov8\\runs\\yolov8s_garbage\\weights\\best.pt')
+model = YOLO('D:\\garbage-yolov8\\runs\\yolov8s_garbage\\weights\\best.pt')
 class_names = model.names  # Danh sách nhãn
+import random
+
+# Tạo màu ngẫu nhiên cho từng class nhưng cố định
+colors = {}
+for i in range(len(model.names)):
+    colors[i] = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+
+def draw_label(img, text, pos, bg_color):
+    """Vẽ label có nền màu"""
+    font_scale = 0.6
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    thickness = 2
+    text_size, _ = cv2.getTextSize(text, font, font_scale, thickness)
+    x, y = pos
+    cv2.rectangle(img, (x, y - text_size[1] - 4), (x + text_size[0] + 4, y), bg_color, -1)
+    cv2.putText(img, text, (x + 2, y - 2), font, font_scale, (255, 255, 255), thickness, lineType=cv2.LINE_AA)
 
 # Tạo cửa sổ chính
 root = tk.Tk()
@@ -55,10 +73,9 @@ result_box.pack(fill=tk.BOTH, expand=True)
 def detect_and_display(image):
     results = model(image)[0]
 
-    # Clear khung kết quả trước mỗi lần hiển thị
+    # Clear khung kết quả
     result_box.delete(0, tk.END)
-
-    detected_classes = []  # Giữ toàn bộ nhãn (bao gồm trùng lặp)
+    detected_classes = []
 
     for box in results.boxes:
         conf = float(box.conf[0])
@@ -66,16 +83,17 @@ def detect_and_display(image):
             continue
         x1, y1, x2, y2 = map(int, box.xyxy[0])
         cls_id = int(box.cls[0])
-        label = f"{class_names[cls_id]} {conf:.2f}"
+        label_text = f"{class_names[cls_id]} {conf:.2f}"
+
         detected_classes.append(f"{class_names[cls_id]} ({conf:.2f})")
 
-        # Vẽ box và nhãn lên ảnh
-        cv2.rectangle(image, (x1, y1), (x2, y2), (0, 255, 0), 2)
-        cv2.putText(image, label, (x1, y1 - 10),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+        # Vẽ khung màu riêng cho từng class
+        color = colors[cls_id]
+        cv2.rectangle(image, (x1, y1), (x2, y2), color, 2)
+        draw_label(image, label_text, (x1, y1), color)
 
-    # Hiển thị tất cả nhãn (bao gồm trùng)
-    for cls in detected_classes:
+    # Hiển thị nhãn duy nhất (không lặp)
+    for cls in sorted(set(detected_classes)):
         result_box.insert(tk.END, cls)
 
     return image
