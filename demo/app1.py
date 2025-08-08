@@ -71,7 +71,10 @@ result_box.pack(fill=tk.BOTH, expand=True)
 
 # ======== HÀM CHÍNH NHẬN DIỆN ==========
 def detect_and_display(image):
-    results = model(image)[0]
+    input_size = 640
+    image_resized = cv2.resize(image, (input_size, input_size))
+
+    results = model(image_resized)[0]
 
     # Clear khung kết quả
     result_box.delete(0, tk.END)
@@ -87,18 +90,14 @@ def detect_and_display(image):
 
         detected_classes.append(f"{class_names[cls_id]} ({conf:.2f})")
 
-        # Vẽ khung màu riêng cho từng class
         color = colors[cls_id]
-        cv2.rectangle(image, (x1, y1), (x2, y2), color, 2)
-        draw_label(image, label_text, (x1, y1), color)
+        cv2.rectangle(image_resized, (x1, y1), (x2, y2), color, 2)
+        draw_label(image_resized, label_text, (x1, y1), color)
 
-    # Hiển thị nhãn duy nhất (không lặp)
     for cls in sorted(set(detected_classes)):
         result_box.insert(tk.END, cls)
 
-    return image
-
-
+    return image_resized
 # ======== GỬI ẢNH ========
 def open_image():
     file_path = filedialog.askopenfilename()
@@ -149,6 +148,8 @@ def open_video():
     if not file_path:
         return
 
+    camera_active[0] = True  # Đặt True trước khi chạy thread
+
     def video_loop():
         cap = cv2.VideoCapture(file_path)
         while cap.isOpened():
@@ -161,7 +162,6 @@ def open_video():
             imgtk = ImageTk.PhotoImage(image=img)
             panel.config(image=imgtk)
             panel.image = imgtk
-            # Dừng nếu người dùng bấm tắt camera (dùng chung biến)
             if not camera_active[0]:
                 break
             # Thêm delay để video không chạy quá nhanh
@@ -169,9 +169,7 @@ def open_video():
                 break
         cap.release()
 
-    camera_active[0] = True
     threading.Thread(target=video_loop, daemon=True).start()
-
 # ...existing code...
 
 # Chạy GUI
