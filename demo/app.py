@@ -136,6 +136,41 @@ def open_camera():
 # ======== TẮT CAMERA ========
 def stop_camera():
     camera_active[0] = False
+# ...existing code...
 
+btn_video = tk.Button(left_frame, text="📹 Gửi Video", command=lambda: open_video(), width=15, height=2)
+btn_video.pack(pady=10)
+
+# ...existing code...
+
+def open_video():
+    file_path = filedialog.askopenfilename(filetypes=[("Video files", "*.mp4;*.avi;*.mov;*.mkv")])
+    if not file_path:
+        return
+
+    def video_loop():
+        cap = cv2.VideoCapture(file_path)
+        while cap.isOpened():
+            ret, frame = cap.read()
+            if not ret:
+                break
+            frame = detect_and_display(frame)
+            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            img = Image.fromarray(frame_rgb)
+            imgtk = ImageTk.PhotoImage(image=img)
+            panel.config(image=imgtk)
+            panel.image = imgtk
+            # Dừng nếu người dùng bấm tắt camera (dùng chung biến)
+            if not camera_active[0]:
+                break
+            # Thêm delay để video không chạy quá nhanh
+            if cv2.waitKey(30) & 0xFF == ord('q'):
+                break
+        cap.release()
+
+    camera_active[0] = True
+    threading.Thread(target=video_loop, daemon=True).start()
+
+# ...existing code...
 # Chạy GUI
 root.mainloop()
