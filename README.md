@@ -18,18 +18,7 @@
 │       ├── labels_correlogram.jpg
 │       ├── results.csv
 │       ├── results.png
-│       ├── train_batch0.jpg
-│       ├── train_batch1.jpg
-│       ├── train_batch2.jpg
-│       ├── train_batch4440.jpg
-│       ├── train_batch4441.jpg
-│       ├── train_batch4442.jpg
-│       ├── val_batch0_labels.jpg
-│       ├── val_batch0_pred.jpg
-│       ├── val_batch1_labels.jpg
-│       ├── val_batch1_pred.jpg
-│       ├── val_batch2_labels.jpg
-│       ├── val_batch2_pred.jpg
+│          .....
 │       └── weights
 │           ├── best.pt
 │           └── last.pt
@@ -47,18 +36,7 @@
         ├── labels_correlogram.jpg
         ├── results.csv
         ├── results.png
-        ├── train_batch0.jpg
-        ├── train_batch1.jpg
-        ├── train_batch2.jpg
-        ├── train_batch10520.jpg
-        ├── train_batch10521.jpg
-        ├── train_batch10522.jpg
-        ├── val_batch0_labels.jpg
-        ├── val_batch0_pred.jpg
-        ├── val_batch1_labels.jpg
-        ├── val_batch1_pred.jpg
-        ├── val_batch2_labels.jpg
-        ├── val_batch2_pred.jpg
+        .....
         └── weights
             ├── best.pt
             └── last.pt
